@@ -1,0 +1,7 @@
+{
+  "roc_auc": 0.9486,
+  "accuracy": 0.8917,
+  "high_risk_precision": 0.5702,
+  "high_risk_recall": 0.8415,
+  "high_risk_f1": 0.6798
+}
