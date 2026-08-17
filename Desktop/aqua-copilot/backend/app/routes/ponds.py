@@ -8,6 +8,7 @@ from ..db_models import (
     PondAlertDB
 )
 from ..schemas import PondCreate
+from ..services.trend_service import analyze_pond_trends
 
 
 router = APIRouter(
@@ -156,4 +157,49 @@ def get_pond_alerts(
         "pond_name": pond.pond_name,
         "total_alerts": len(alerts),
         "alerts": alerts
+    }
+
+@router.get("/{pond_id}/trends")
+def get_pond_trends(
+    pond_id: int,
+    db: Session = Depends(get_db)
+):
+
+    # Find pond
+    pond = (
+        db.query(PondDB)
+        .filter(PondDB.id == pond_id)
+        .first()
+    )
+
+    if not pond:
+        return {
+            "error": "Pond not found."
+        }
+
+    # Get recent readings
+    readings = (
+        db.query(PondReadingDB)
+        .filter(
+            PondReadingDB.pond_name
+            == pond.pond_name
+        )
+        .order_by(
+            PondReadingDB.recorded_at.desc()
+        )
+        .limit(10)
+        .all()
+    )
+
+    # Trend service expects oldest -> newest
+    readings.reverse()
+
+    trend_analysis = analyze_pond_trends(
+        readings
+    )
+
+    return {
+        "pond_id": pond.id,
+        "pond_name": pond.pond_name,
+        **trend_analysis
     }

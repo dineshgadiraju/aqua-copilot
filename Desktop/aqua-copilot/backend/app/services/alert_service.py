@@ -1,37 +1,43 @@
 def generate_alerts(reading):
     alerts = []
 
-    # Dissolved Oxygen
-    if reading.dissolved_oxygen_mg_l < 3.0:
+    # ---------------------------------
+    # DISSOLVED OXYGEN
+    # ---------------------------------
+
+    if reading.dissolved_oxygen_mg_l < 3.5:
         alerts.append({
             "parameter": "Dissolved Oxygen",
             "severity": "CRITICAL",
-            "message": "Dissolved oxygen is dangerously low.",
+            "message": "Dissolved oxygen is critically low.",
             "action": (
-                "Start or increase aeration immediately "
-                "and inspect aerator performance."
+                "Increase aeration immediately, reduce feeding "
+                "temporarily, and recheck dissolved oxygen soon."
             )
         })
 
-    elif reading.dissolved_oxygen_mg_l < 4.0:
+    elif reading.dissolved_oxygen_mg_l < 5.0:
         alerts.append({
             "parameter": "Dissolved Oxygen",
             "severity": "WARNING",
             "message": "Dissolved oxygen is below the preferred range.",
             "action": (
-                "Increase aeration and monitor oxygen levels closely."
+                "Increase aeration and monitor dissolved oxygen closely."
             )
         })
 
-    # Ammonia
-    if reading.ammonia_mg_l > 0.5:
+    # ---------------------------------
+    # AMMONIA
+    # ---------------------------------
+
+    if reading.ammonia_mg_l > 1.0:
         alerts.append({
             "parameter": "Ammonia",
             "severity": "CRITICAL",
-            "message": "Ammonia concentration is dangerously high.",
+            "message": "Ammonia concentration is critically elevated.",
             "action": (
-                "Reduce feeding, inspect waste accumulation, "
-                "and consider controlled water exchange."
+                "Reduce feeding, increase aeration, inspect feed waste, "
+                "and consider partial water exchange."
             )
         })
 
@@ -41,19 +47,23 @@ def generate_alerts(reading):
             "severity": "WARNING",
             "message": "Ammonia concentration is elevated.",
             "action": (
-                "Check feed waste and monitor ammonia frequently."
+                "Check feed waste, reduce unnecessary feeding, "
+                "and monitor ammonia closely."
             )
         })
 
+    # ---------------------------------
     # pH
+    # ---------------------------------
+
     if reading.ph < 6.5 or reading.ph > 9.0:
         alerts.append({
             "parameter": "pH",
             "severity": "CRITICAL",
             "message": "Pond pH is outside the safe operating range.",
             "action": (
-                "Check alkalinity and water conditions. "
-                "Correct pH gradually."
+                "Check alkalinity and water conditions and "
+                "correct pH gradually."
             )
         })
 
@@ -67,7 +77,10 @@ def generate_alerts(reading):
             )
         })
 
-    # Temperature
+    # ---------------------------------
+    # TEMPERATURE
+    # ---------------------------------
+
     if reading.temperature_c < 24 or reading.temperature_c > 34:
         alerts.append({
             "parameter": "Temperature",
@@ -88,7 +101,10 @@ def generate_alerts(reading):
             )
         })
 
-    # Salinity
+    # ---------------------------------
+    # SALINITY
+    # ---------------------------------
+
     if reading.salinity_ppt < 5 or reading.salinity_ppt > 35:
         alerts.append({
             "parameter": "Salinity",
@@ -109,15 +125,29 @@ def generate_alerts(reading):
             )
         })
 
-    # Stocking density
+    # ---------------------------------
+    # STOCKING DENSITY
+    # ---------------------------------
+
     if reading.stocking_density_per_m2 > 80:
         alerts.append({
             "parameter": "Stocking Density",
-            "severity": "WARNING",
-            "message": "Stocking density is high.",
+            "severity": "CRITICAL",
+            "message": "Stocking density is very high.",
             "action": (
                 "Increase aeration capacity and closely monitor "
                 "oxygen, biomass, and feeding."
+            )
+        })
+
+    elif reading.stocking_density_per_m2 > 65:
+        alerts.append({
+            "parameter": "Stocking Density",
+            "severity": "WARNING",
+            "message": "Stocking density is above the preferred range.",
+            "action": (
+                "Increase aeration and closely monitor biomass, "
+                "dissolved oxygen, and feeding."
             )
         })
 

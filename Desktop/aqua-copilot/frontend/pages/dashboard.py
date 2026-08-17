@@ -52,7 +52,26 @@ def render_dashboard(api_url):
             "alerts",
             []
         )
+        # ----------------------------
+        # LOAD POND TRENDS
+        # ----------------------------
 
+        trends_response = requests.get(
+            f"{api_url}/ponds/{pond_id}/trends",
+            timeout=10
+        )
+
+        trends_data = trends_response.json()
+
+        pond_trends = trends_data.get(
+            "trends",
+            {}
+        )
+
+        trend_readings = trends_data.get(
+            "readings_analyzed",
+            0
+        )
         # ----------------------------
         # POND INFORMATION
         # ----------------------------
@@ -276,7 +295,97 @@ def render_dashboard(api_url):
                 "🍤 Shrimp Age",
                 f"{int(latest['shrimp_age_days'])} days"
             )
+        # ----------------------------
+        # WATER QUALITY TRENDS
+        # ----------------------------
 
+        if pond_trends:
+
+            st.subheader("📈 Water Quality Trends")
+
+            st.caption(
+                f"Based on the last {trend_readings} readings"
+            )
+
+            trend_labels = {
+                "dissolved_oxygen": "💧 Dissolved Oxygen",
+                "ammonia": "🧪 Ammonia",
+                "temperature": "🌡️ Temperature",
+                "salinity": "🌊 Salinity",
+                "ph": "⚗️ pH"
+            }
+
+            trend_units = {
+                "dissolved_oxygen": "mg/L",
+                "ammonia": "mg/L",
+                "temperature": "°C",
+                "salinity": "ppt",
+                "ph": ""
+            }
+
+            columns = st.columns(5)
+
+            for column, (
+                parameter,
+                label
+            ) in zip(
+                columns,
+                trend_labels.items()
+            ):
+
+                trend_info = pond_trends.get(
+                    parameter,
+                    {}
+                )
+
+                trend = trend_info.get(
+                    "trend",
+                    "UNKNOWN"
+                )
+
+                change = trend_info.get(
+                    "change",
+                    0
+                )
+
+                if change > 0:
+                    direction = "↑"
+                elif change < 0:
+                    direction = "↓"
+                else:
+                    direction = "→"
+
+                if trend == "IMPROVING":
+                    status = "🟢 Improving"
+
+                elif trend == "WORSENING":
+                    status = "🔴 Worsening"
+
+                elif trend == "STABLE":
+                    status = "🟢 Stable"
+
+                else:
+                    status = "⚪ Insufficient Data"
+
+                unit = trend_units.get(
+                    parameter,
+                    ""
+                )
+
+                with column:
+
+                    st.markdown(
+                        f"**{label}**"
+                    )
+
+                    st.metric(
+                        status,
+                        (
+                            f"{direction} "
+                            f"{abs(change):.2f} {unit}"
+                        ).strip()
+                    )
+                
         st.divider()
 
         # ----------------------------
