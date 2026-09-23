@@ -2,138 +2,165 @@ def explain(reading):
     factors = []
     actions = []
 
-    # ---------------------------------
-    # DISSOLVED OXYGEN
-    # ---------------------------------
-
-    if reading.dissolved_oxygen_mg_l < 3.5:
-        factors.append(
-            "Critical dissolved oxygen level"
-        )
-        actions.append(
-            "Increase aeration immediately, reduce feeding "
-            "temporarily, and recheck dissolved oxygen soon."
-        )
-
-    elif reading.dissolved_oxygen_mg_l < 5.0:
-        factors.append(
-            "Dissolved oxygen below preferred range"
-        )
-        actions.append(
-            "Increase aeration and monitor dissolved oxygen "
-            "closely."
-        )
-
-    # ---------------------------------
-    # AMMONIA
-    # ---------------------------------
-
-    if reading.ammonia_mg_l > 1.0:
-        factors.append(
-            "Critically elevated ammonia"
-        )
-        actions.append(
-            "Reduce feeding, increase aeration, inspect feed "
-            "waste, and consider partial water exchange."
-        )
-
-    elif reading.ammonia_mg_l > 0.25:
-        factors.append(
-            "Elevated ammonia"
-        )
-        actions.append(
-            "Check feed waste, reduce unnecessary feeding, "
-            "and monitor ammonia closely."
-        )
-
-    # ---------------------------------
-    # pH
-    # ---------------------------------
-
-    if reading.ph < 7.0:
-        factors.append(
-            "Low pond pH"
-        )
-        actions.append(
-            "Check alkalinity and correct pH gradually."
-        )
-
-    elif reading.ph > 8.6:
-        factors.append(
-            "High pond pH"
-        )
-        actions.append(
-            "Monitor algae activity and correct pH gradually."
-        )
-
-    # ---------------------------------
-    # TEMPERATURE
-    # ---------------------------------
-
+    # Temperature
     if reading.temperature_c < 26:
         factors.append(
-            "Low water temperature"
+            f"Water temperature is low at "
+            f"{reading.temperature_c}°C."
         )
         actions.append(
-            "Monitor shrimp feeding activity and reduce feed "
-            "if shrimp activity decreases."
+            "Monitor temperature closely and avoid sudden "
+            "water exchanges that may reduce temperature further."
         )
 
     elif reading.temperature_c > 32:
         factors.append(
-            "High water temperature"
+            f"Water temperature is high at "
+            f"{reading.temperature_c}°C."
         )
         actions.append(
-            "Increase aeration and monitor dissolved oxygen "
-            "more frequently."
+            "Increase aeration and, if possible, perform a "
+            "controlled partial water exchange."
         )
 
-    # ---------------------------------
-    # SALINITY
-    # ---------------------------------
-
-    if reading.salinity_ppt < 8:
+    # pH
+    if reading.ph < 7.5:
         factors.append(
-            "Low salinity"
+            f"pH is low at {reading.ph}."
         )
         actions.append(
-            "Avoid sudden salinity changes and monitor shrimp "
-            "for signs of stress."
+            "Check alkalinity and water quality. "
+            "Correct pH gradually rather than making sudden changes."
         )
 
-    elif reading.salinity_ppt > 28:
+    elif reading.ph > 8.5:
         factors.append(
-            "High salinity"
+            f"pH is high at {reading.ph}."
         )
         actions.append(
-            "Adjust salinity gradually where farm conditions "
-            "allow and monitor shrimp behavior."
+            "Monitor algae growth and reduce excessive nutrient input. "
+            "Check pH again during early morning and afternoon."
         )
 
-    # ---------------------------------
-    # STOCKING DENSITY
-    # ---------------------------------
-
-    if reading.stocking_density_per_m2 > 65:
+    # Dissolved Oxygen
+    if reading.dissolved_oxygen_mg_l < 3:
         factors.append(
-            "High stocking density"
+            f"Dissolved oxygen is critically low at "
+            f"{reading.dissolved_oxygen_mg_l} mg/L."
         )
         actions.append(
-            "Increase aeration capacity and closely monitor "
-            "biomass, dissolved oxygen, and feeding."
+            "Start aerators immediately and reduce feeding "
+            "until dissolved oxygen improves."
         )
 
-    # ---------------------------------
-    # NORMAL CONDITIONS
-    # ---------------------------------
+    elif reading.dissolved_oxygen_mg_l < 5:
+        factors.append(
+            f"Dissolved oxygen is below the preferred range at "
+            f"{reading.dissolved_oxygen_mg_l} mg/L."
+        )
+        actions.append(
+            "Increase aeration, especially during the night "
+            "and early morning."
+        )
 
+    # Salinity
+    if reading.salinity_ppt < 5:
+        factors.append(
+            f"Salinity is very low at "
+            f"{reading.salinity_ppt} ppt."
+        )
+        actions.append(
+            "Check source-water salinity and adjust gradually "
+            "if the cultured shrimp require higher salinity."
+        )
+
+    elif reading.salinity_ppt > 30:
+        factors.append(
+            f"Salinity is high at "
+            f"{reading.salinity_ppt} ppt."
+        )
+        actions.append(
+            "Avoid sudden salinity changes. Consider controlled "
+            "freshwater addition if appropriate."
+        )
+
+    # Ammonia
+    if reading.ammonia_mg_l >= 1:
+        factors.append(
+            f"Ammonia is dangerously high at "
+            f"{reading.ammonia_mg_l} mg/L."
+        )
+        actions.append(
+            "Reduce or temporarily stop feeding, increase aeration, "
+            "remove organic waste and consider a partial water exchange."
+        )
+
+    elif reading.ammonia_mg_l >= 0.5:
+        factors.append(
+            f"Ammonia is elevated at "
+            f"{reading.ammonia_mg_l} mg/L."
+        )
+        actions.append(
+            "Reduce feeding slightly and monitor ammonia again soon. "
+            "Check pond waste accumulation."
+        )
+
+    # Stocking density
+    if reading.stocking_density_per_m2 > 70:
+        factors.append(
+            f"Stocking density is high at "
+            f"{reading.stocking_density_per_m2} shrimp/m²."
+        )
+        actions.append(
+            "Increase aeration capacity and monitor oxygen, "
+            "ammonia and feeding response more frequently."
+        )
+
+    # Feed
+    if (
+        reading.feed_kg_day > 40
+        and reading.ammonia_mg_l >= 0.5
+    ):
+        factors.append(
+            "High feeding combined with elevated ammonia may "
+            "be increasing pond organic waste."
+        )
+        actions.append(
+            "Reduce feed temporarily and check feed trays "
+            "for uneaten feed."
+        )
+
+    # Combined critical condition
+    if (
+        reading.dissolved_oxygen_mg_l < 3
+        and reading.ammonia_mg_l >= 1
+    ):
+        factors.insert(
+            0,
+            "Low dissolved oxygen and high ammonia together "
+            "create a serious stress condition."
+        )
+
+        actions.insert(
+            0,
+            "PRIORITY: Increase aeration immediately, reduce feeding "
+            "and inspect shrimp behavior for signs of stress."
+        )
+
+    # Healthy pond
     if not factors:
         factors.append(
-            "No major threshold violations detected"
+            "All major monitored water-quality parameters "
+            "are currently within acceptable ranges."
         )
+
         actions.append(
-            "Pond conditions appear stable. Continue routine "
-            "monitoring and normal feeding practices."
+            "Continue normal pond management and regular "
+            "water-quality monitoring."
         )
+
+    # Avoid duplicate recommendations
+    factors = list(dict.fromkeys(factors))
+    actions = list(dict.fromkeys(actions))
 
     return factors, actions

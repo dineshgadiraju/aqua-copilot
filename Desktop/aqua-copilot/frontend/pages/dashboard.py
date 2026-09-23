@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 
-
+from components.forecast import render_forecast
 def render_dashboard(api_url):
 
     st.subheader("Farm Dashboard")
@@ -295,6 +295,12 @@ def render_dashboard(api_url):
                 "🍤 Shrimp Age",
                 f"{int(latest['shrimp_age_days'])} days"
             )
+        st.divider()
+
+        render_forecast(
+            api_url,
+            selected_pond_name,
+        )
         # ----------------------------
         # WATER QUALITY TRENDS
         # ----------------------------
