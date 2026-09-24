@@ -157,3 +157,100 @@ def dissolved_oxygen_warning(
     forecast["action"] = action
 
     return forecast
+def ammonia_warning(
+    readings,
+    hours_ahead: int = 6,
+):
+    forecast = forecast_parameter(
+        readings,
+        "ammonia_mg_l",
+        hours_ahead,
+    )
+
+    if forecast["status"] != "OK":
+        return forecast
+
+    current_ammonia = forecast["current_value"]
+    predicted_ammonia = forecast["predicted_value"]
+    slope = forecast["change_per_hour"]
+
+    # Current critical condition takes priority
+    if current_ammonia > 0.5:
+        severity = "CRITICAL"
+
+        message = (
+            f"Ammonia is currently critically high at "
+            f"{current_ammonia} mg/L. It is forecast to reach "
+            f"{predicted_ammonia} mg/L within "
+            f"{hours_ahead} hours."
+        )
+
+        action = (
+            "Reduce feeding, improve aeration, check water "
+            "quality, and consider partial water exchange."
+        )
+
+    # Future critical condition
+    elif predicted_ammonia > 0.5:
+        severity = "CRITICAL"
+
+        message = (
+            f"Ammonia is forecast to rise from "
+            f"{current_ammonia} mg/L to "
+            f"{predicted_ammonia} mg/L within "
+            f"{hours_ahead} hours."
+        )
+
+        action = (
+            "Reduce feeding and prepare corrective "
+            "water-quality measures."
+        )
+
+    # Future warning condition
+    elif predicted_ammonia > 0.25:
+        severity = "WARNING"
+
+        if slope > 0:
+            message = (
+                f"Ammonia is trending upward and may rise "
+                f"from {current_ammonia} mg/L to "
+                f"{predicted_ammonia} mg/L within "
+                f"{hours_ahead} hours."
+            )
+        else:
+            message = (
+                f"Ammonia is forecast at "
+                f"{predicted_ammonia} mg/L within "
+                f"{hours_ahead} hours, which remains "
+                f"in the warning range."
+            )
+
+        action = (
+            "Monitor ammonia closely and avoid "
+            "overfeeding."
+        )
+
+    else:
+        severity = "NORMAL"
+
+        if slope < 0:
+            trend = "improving"
+        elif slope > 0:
+            trend = "increasing"
+        else:
+            trend = "stable"
+
+        message = (
+            f"Ammonia is {trend}. Current level is "
+            f"{current_ammonia} mg/L and the "
+            f"{hours_ahead}-hour forecast is "
+            f"{predicted_ammonia} mg/L."
+        )
+
+        action = "Continue routine monitoring."
+
+    forecast["severity"] = severity
+    forecast["message"] = message
+    forecast["action"] = action
+
+    return forecast

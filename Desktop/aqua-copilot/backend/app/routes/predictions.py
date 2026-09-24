@@ -4,7 +4,10 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..db_models import PondReadingDB, PondAlertDB
 from ..schemas import PondReading
-from ..services.forecast_service import dissolved_oxygen_warning
+from ..services.forecast_service import (
+    dissolved_oxygen_warning,
+    ammonia_warning,
+)
 from ..services.ml_service import predict_pond_risk
 from ..services.alert_service import generate_alerts
 from ..services.recommendation_service import explain
@@ -127,6 +130,37 @@ def forecast_pond(
         }
 
     return dissolved_oxygen_warning(
+        readings,
+        hours_ahead=hours,
+    )
+
+@router.get("/ponds/{pond_name}/forecast/ammonia")
+def forecast_ammonia(
+    pond_name: str,
+    hours: int = 6,
+    db: Session = Depends(get_db),
+):
+    # Limit forecast window to 1–24 hours
+    hours = max(1, min(hours, 24))
+
+    readings = (
+        db.query(PondReadingDB)
+        .filter(
+            PondReadingDB.pond_name == pond_name
+        )
+        .order_by(
+            PondReadingDB.recorded_at.asc()
+        )
+        .all()
+    )
+
+    if not readings:
+        return {
+            "status": "NO_DATA",
+            "message": f"No readings found for pond '{pond_name}'.",
+        }
+
+    return ammonia_warning(
         readings,
         hours_ahead=hours,
     )
