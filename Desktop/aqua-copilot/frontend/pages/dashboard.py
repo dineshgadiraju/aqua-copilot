@@ -3,6 +3,7 @@ import requests
 import pandas as pd
 
 from components.forecast import render_forecast
+from components.pond_assistant import render_pond_assistant
 def render_dashboard(api_url):
 
     st.subheader("Farm Dashboard")
@@ -298,6 +299,12 @@ def render_dashboard(api_url):
         st.divider()
 
         render_forecast(
+            api_url,
+            selected_pond_name,
+        )
+        st.divider()
+
+        render_pond_assistant(
             api_url,
             selected_pond_name,
         )

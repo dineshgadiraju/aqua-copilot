@@ -8,6 +8,8 @@ from ..services.forecast_service import (
     dissolved_oxygen_warning,
     ammonia_warning,
 )
+from ..services.pond_context_service import get_pond_context
+from ..services.pond_assistant_service import ask_pond_assistant
 from ..services.ml_service import predict_pond_risk
 from ..services.alert_service import generate_alerts
 from ..services.recommendation_service import explain
@@ -163,4 +165,25 @@ def forecast_ammonia(
     return ammonia_warning(
         readings,
         hours_ahead=hours,
+    )
+
+@router.get("/ponds/{pond_name}/context")
+def pond_context(
+    pond_name: str,
+    db: Session = Depends(get_db),
+):
+    return get_pond_context(
+        db,
+        pond_name,
+    )
+@router.get("/ponds/{pond_name}/assistant")
+def pond_assistant(
+    pond_name: str,
+    question: str,
+    db: Session = Depends(get_db),
+):
+    return ask_pond_assistant(
+        db=db,
+        pond_name=pond_name,
+        question=question,
     )
